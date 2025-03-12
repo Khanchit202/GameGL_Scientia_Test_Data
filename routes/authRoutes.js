@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const User = require('../models/User');
-const auth = require('../middleware/auth'); 
+const auth = require('../middleware/auth');
 
 dotenv.config();
 
@@ -108,16 +108,18 @@ router.post('/login', async (req, res) => {
       console.error(err.message);
       res.status(500).send('Server error');
     }
-  });
+});
 
-  router.post('/logout', auth, (req, res) => {
-    try {
-      res.json({ msg: 'Logged out successfully' });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server error');
-    }
-  });
-  
+// @route   POST api/auth/logout
+// @desc    Logout user (Logout is done on the client-side)
+// @access  Private
+router.post('/logout', auth, (req, res) => {
+  try {
+    res.json({ msg: 'Logged out successfully' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
 
 module.exports = router;
