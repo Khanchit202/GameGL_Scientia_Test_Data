@@ -6,6 +6,7 @@ const auth = require('../middleware/auth');
 // @route   POST api/quiz/add
 // @desc    เพิ่มโจทย์ใหม่
 // @access  Private (ต้องมี Token)
+// routes/quizRoutes.js
 router.post('/add', auth, async (req, res) => {
   const { question, options, correctAnswer } = req.body;
 
