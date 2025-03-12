@@ -57,4 +57,37 @@ router.get('/random', auth, async (req, res) => {
   }
 });
 
+// @route   POST api/quiz/submit
+// @desc    ส่งคำตอบและอัปเดตคะแนน
+// @access  Private
+router.post('/submit', auth, async (req, res) => {
+  const { quizId, isCorrect } = req.body;
+
+  try {
+    // ตรวจสอบว่ามีข้อมูลครบถ้วนหรือไม่
+    if (!quizId || isCorrect === undefined) {
+      return res.status(400).json({ msg: 'Please provide quizId and isCorrect' });
+    }
+
+    // ดึงข้อมูลผู้ใช้
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+
+    // อัปเดตคะแนน (ถ้าตอบถูก)
+    if (isCorrect) {
+      user.score += 10; // เพิ่มคะแนน +10
+      await user.save();
+    }
+
+    res.json({ msg: 'Answer submitted successfully', score: user.score });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+
 module.exports = router;
