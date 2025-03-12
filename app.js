@@ -21,6 +21,9 @@ const objectRoutes = require('./routes/objectRoutes');
 app.use('/api/object', objectRoutes);
 app.use('/api/user', objectRoutes);
 
+const quizRoutes = require('./routes/quizRoutes'); // เพิ่มบรรทัดนี้
+app.use('/api/quiz', quizRoutes);
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
