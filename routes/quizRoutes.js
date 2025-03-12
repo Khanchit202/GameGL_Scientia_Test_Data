@@ -38,4 +38,23 @@ router.post('/add', auth, async (req, res) => {
   }
 });
 
+// @route   GET api/quiz/random
+// @desc    ดึงคำถามแบบสุ่ม
+// @access  Private
+router.get('/random', auth, async (req, res) => {
+  try {
+    // ดึงคำถามแบบสุ่ม 1 ข้อ
+    const quiz = await Quiz.aggregate([{ $sample: { size: 1 } }]);
+
+    if (!quiz.length) {
+      return res.status(404).json({ msg: 'No quizzes found' });
+    }
+
+    res.json(quiz[0]);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
 module.exports = router;
