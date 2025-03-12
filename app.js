@@ -24,6 +24,9 @@ app.use('/api/user', objectRoutes);
 const quizRoutes = require('./routes/quizRoutes');
 app.use('/api/quiz', quizRoutes);
 
+const questRoutes = require('./routes/questRoutes');
+app.use('/api/quest', questRoutes); 
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));

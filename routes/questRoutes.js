@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const Quest = require('../models/Quest');
+const Quiz = require('../models/Quiz');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
 
@@ -12,18 +13,23 @@ router.post('/start', auth, async (req, res) => {
   const { objectId, quizId } = req.body;
 
   try {
-    // ตรวจสอบว่าภารกิจนี้เสร็จสิ้นแล้วหรือไม่
-    let quest = await Quest.findOne({ objectId, userId: req.user.id });
+    // ตรวจสอบว่ามีข้อมูลครบถ้วนหรือไม่
+    if (!objectId || !quizId) {
+      return res.status(400).json({ msg: 'Please provide objectId and quizId' });
+    }
 
-    if (quest && quest.isCompleted) {
+    // ตรวจสอบว่าภารกิจนี้เคยทำเสร็จแล้วหรือไม่
+    const existingQuest = await Quest.findOne({ userId: req.user.id, objectId });
+
+    if (existingQuest && existingQuest.isCompleted) {
       return res.status(400).json({ msg: 'Quest already completed' });
     }
 
-    // สร้างหรืออัปเดตภารกิจ
-    quest = new Quest({
+    // สร้างภารกิจใหม่
+    const quest = new Quest({
+      userId: req.user.id,
       objectId,
       quizId,
-      userId: req.user.id,
     });
 
     await quest.save();
@@ -41,14 +47,19 @@ router.post('/complete', auth, async (req, res) => {
   const { objectId, selectedAnswer } = req.body;
 
   try {
+    // ตรวจสอบว่ามีข้อมูลครบถ้วนหรือไม่
+    if (!objectId || selectedAnswer === undefined) {
+      return res.status(400).json({ msg: 'Please provide objectId and selectedAnswer' });
+    }
+
     // ดึงข้อมูลภารกิจ
-    let quest = await Quest.findOne({ objectId, userId: req.user.id });
+    const quest = await Quest.findOne({ userId: req.user.id, objectId });
 
     if (!quest) {
       return res.status(404).json({ msg: 'Quest not found' });
     }
 
-    // ดึงข้อมูลแบบทดสอบ
+    // ดึงข้อมูล Quiz
     const quiz = await Quiz.findById(quest.quizId);
 
     if (!quiz) {
@@ -70,6 +81,19 @@ router.post('/complete', auth, async (req, res) => {
     }
 
     res.json({ isCorrect, msg: isCorrect ? 'Correct answer!' : 'Wrong answer!' });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// @route   GET api/quest/status
+// @desc    ตรวจสอบสถานะภารกิจ
+// @access  Private
+router.get('/status', auth, async (req, res) => {
+  try {
+    const quests = await Quest.find({ userId: req.user.id });
+    res.json(quests);
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server error');
