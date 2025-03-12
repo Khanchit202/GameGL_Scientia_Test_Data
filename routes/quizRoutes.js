@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Quiz = require('../models/Quiz');
+const User = require('../models/User');
 const auth = require('../middleware/auth');
 
 // @route   POST api/quiz/add
